@@ -1,50 +1,60 @@
-import {expect} from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 export class LoginPage {
-    constructor(page)
-    {
-        this.page=page;
-        this.username=page.locator('#user-name');
-        this.password=page.locator('#password');
-        this.loginButton=page.locator('#login-button');
+    readonly page: Page;
+    readonly username: Locator;
+    readonly password: Locator;
+    readonly loginButton: Locator;
+    readonly loginCredentials: Locator;
+    readonly loginPassword: Locator;
+    readonly errorMessage: Locator;
+    readonly inventoryList: Locator;
+    readonly menuButton: Locator;
+    readonly logoutButton: Locator;
+    readonly url: string;
 
-        this.loginCredentials=page.locator('.login_credentials');
-        this.loginPassword=page.locator('.login_password');
 
-        this.errorMessage=page.locator('[data-test="error"]');
-        this.inventoryList=page.locator('.inventory_list');
+    constructor(page: Page) {
 
-        this.menuButton=page.locator('#react-burger-menu-btn');
-        this.logoutButton=page.locator('#logout_sidebar_link');
+        this.page = page;
+        this.username = page.locator('#user-name');
+        this.password = page.locator('#password');
+        this.loginButton = page.locator('#login-button');
 
-        this.url='https://www.saucedemo.com';
+        this.loginCredentials = page.locator('.login_credentials');
+        this.loginPassword = page.locator('.login_password');
+
+        this.errorMessage = page.locator('[data-test="error"]');
+        this.inventoryList = page.locator('.inventory_list');
+
+        this.menuButton = page.locator('#react-burger-menu-btn');
+        this.logoutButton = page.locator('#logout_sidebar_link');
+
+        this.url = 'https://www.saucedemo.com';
     }
 
-    async navigateToLoginPage()
-    {
+    async navigateToLoginPage() {
         await this.page.goto(this.url);
 
     }
 
-    async getAllUsernames()
-    {
-        const allUsers=await this.loginCredentials.innerText();
+    async getAllUsernames() {
+        const allUsers = await this.loginCredentials.innerText();
         console.log(allUsers);
 
-        const users=allUsers
-                .split('\n')
-                .map(name=>name.trim())
-                .filter(name=>name && name !=='Accepted usernames are:');
-            return users;
-        
+        const users = allUsers
+            .split('\n')
+            .map(name => name.trim())
+            .filter(name => name && name !== 'Accepted usernames are:');
+        return users;
+
 
     }
 
-    async getPassword()
-    {
-        const passwordText= await this.loginPassword.innerText();
-        
-        const password=passwordText
+    async getPassword() {
+        const passwordText = await this.loginPassword.innerText();
+
+        const password = passwordText
             .split('\n')
             .map(value => value.trim())
             .filter(Boolean)
@@ -52,34 +62,31 @@ export class LoginPage {
         return password;
     }
 
-    async login(username,password)
-    {
+    async login(username: string, password: string) {
         await this.username.fill(username);
-        await this.pasword.fill(password);
+        await this.password.fill(password);
         await this.loginButton.click();
 
     }
 
-    async verifyLockedoutUser()
-    {
+    async verifyLockedoutUser() {
         await expect(this.errorMessage).toContainText('locked out');
 
     }
-    async verifySucessfullLogin()
-    {
+    async verifySucessfullLogin() {
         await expect(this.page).toHaveURL(/inventory.html/);
         await expect(this.inventoryList).toBeVisible();
 
     }
 
-    async logout(){
+    async logout() {
         await this.menuButton.click();
         await this.logoutButton.click();
         await expect(this.page).toHaveURL(this.url);
 
     }
 
-    }
+}
 
 
 
